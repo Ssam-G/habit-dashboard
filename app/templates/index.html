@@ -16,20 +16,14 @@
         {% if habits and habits|length > 0 %}
             <div class="habits">
                 {% for habit in habits %}
-                    <div class="habit-card">
-                        <div class="habit-main">
-                            <div class="habit-name">{{ habit["name"] }}</div>
-
-                            {% if habit["goal"] %}
-                                <div class="habit-goal">Goal: {{ habit["goal"] }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
+                    <a class="habit-card" href="/habit/{{ habit['id'] }}">            
+                        <div class="habit-name">{{ habit["name"] }}</div>
+                    </a>
                 {% endfor %}
             </div>
         {% else %}
             <div class="empty">
-                <p>No habits yet. Add your first one.</p>
+                <p>No habits yet...</p>
             </div>
         {% endif %}
     </div>

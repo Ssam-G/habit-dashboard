@@ -31,9 +31,22 @@ def get_week_end():
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     habits = get_habits()
-    logs = get_logs_between(start_date=get_current_week_start(), end_date=get_week_end())
+    logs = get_logs_between(start_date=get_current_week_start(), end_date=get_week_end(), habit_id=None)
 
     return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "logs": logs})
+
+@app.get("/habit/{habit_id}", response_class=HTMLResponse)
+def habit_detail(request: Request, habit_id: int):
+    conn = get_db_connection()
+    habit = conn.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+    conn.close()
+
+    if habit is None:
+        return RedirectResponse("/", status_code=303)
+
+    logs = get_logs(habit_id)
+
+    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs})
 
 @app.get("/add_habit_page", response_class=HTMLResponse)
 def add_habit_page(request: Request):
