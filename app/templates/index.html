@@ -1,15 +1,37 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{{ title }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Habit Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>{{ title }}</h1>
-    <p>Server is running. Next: database + habit logging.</p>
-  </div>
+    <div class="container">
+        <div class="header">
+            <h1>Habit Dashboard</h1>
+            <a class="btn" href="{{ url_for('add_habit_page') }}">Add Habit</a>
+        </div>
+
+        {% if habits and habits|length > 0 %}
+            <div class="habits">
+                {% for habit in habits %}
+                    <div class="habit-card">
+                        <div class="habit-main">
+                            <div class="habit-name">{{ habit["name"] }}</div>
+
+                            {% if habit["goal"] %}
+                                <div class="habit-goal">Goal: {{ habit["goal"] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                <p>No habits yet. Add your first one.</p>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>

@@ -1,21 +1,21 @@
 import sqlite3
 
-DB_NAME = "habits.db"
+DB_ONE = "habits.db"
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_ONE)
     conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA foreign_keys = ON')
     return conn
 
 def init_db():
     conn = get_db_connection()
-    conn.execute('PRAGMA foreign_keys = ON')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS habits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
             goal TEXT,
-            created_at TEXT NOT NULL DEFAULT (datetime('now')
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
         )
     ''')
     conn.execute('''
@@ -30,3 +30,21 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+
+def get_habits():
+    conn = get_db_connection()
+    habits = conn.execute('SELECT * FROM habits ORDER BY created_at DESC').fetchall()
+    conn.close()
+    return habits
+
+def get_logs(habit_id):
+    conn = get_db_connection()
+    logs = conn.execute('SELECT * FROM logs WHERE habit_id = ? ORDER BY date DESC', (habit_id,)).fetchall()
+    conn.close()
+    return logs
+
+def get_logs_between(start_date, end_date):
+    conn = get_db_connection()
+    logs = conn.execute('SELECT * FROM logs WHERE date BETWEEN ? AND ? ORDER BY date DESC', (start_date, end_date)).fetchall()
+    conn.close()
+    return logs
