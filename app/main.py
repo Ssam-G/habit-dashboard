@@ -8,7 +8,7 @@ from .db import get_logs_between
 from .db import get_db_connection
 from .db import get_weekly_minutes_for_habit
 from .db import init_db
-from datetime import date, timedelta
+from datetime import date as dt_date, timedelta
 
 app = FastAPI()
 
@@ -20,7 +20,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 def get_current_week_start():
-    today = date.today()
+    today = dt_date.today()
     start_of_week = today - timedelta(days=today.weekday())
     return start_of_week
 
@@ -72,8 +72,8 @@ def add_log(request: Request, habit_id, date: str = Form(None), minutes: int = F
     if note == "":
         note = None
 
-    if date == "":
-        date = date.today().isoformat()
+    if not date:
+        date = dt_date.today().isoformat()
 
     conn = get_db_connection()
     conn.execute('INSERT INTO logs (habit_id, date, minutes, note) VALUES (?, ?, ?, ?)', (habit_id, date, minutes, note))
