@@ -6,6 +6,7 @@ from .db import get_habits
 from .db import get_logs
 from .db import get_logs_between
 from .db import get_db_connection
+from .db import get_weekly_minutes_for_habit
 from .db import init_db
 from datetime import date, timedelta
 
@@ -31,7 +32,7 @@ def get_week_end():
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     habits = get_habits()
-    logs = get_logs_between(start_date=get_current_week_start(), end_date=get_week_end(), habit_id=None)
+    logs = get_logs_between(start_date=get_current_week_start(), end_date=get_week_end())
 
     return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "logs": logs})
 
@@ -46,7 +47,9 @@ def habit_detail(request: Request, habit_id: int):
 
     logs = get_logs(habit_id)
 
-    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs})
+    weekly_minutes = get_weekly_minutes_for_habit(habit_id, start_date=get_current_week_start(), end_date=get_week_end())   
+
+    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes})
 
 @app.get("/add_habit_page", response_class=HTMLResponse)
 def add_habit_page(request: Request):
@@ -63,4 +66,19 @@ def add_habit(request: Request, name: str = Form(...), goal: str = Form(None)):
     conn.close()
 
     return RedirectResponse("/", status_code=303)
+
+@app.post("/add_log/{habit_id}", response_class=HTMLResponse)
+def add_log(request: Request, habit_id, date: str = Form(None), minutes: int = Form(...), note: str = Form(None)):
+    if note == "":
+        note = None
+
+    if date == "":
+        date = date.today().isoformat()
+
+    conn = get_db_connection()
+    conn.execute('INSERT INTO logs (habit_id, date, minutes, note) VALUES (?, ?, ?, ?)', (habit_id, date, minutes, note))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(f"/habit/{habit_id}", status_code=303)
     
