@@ -12,7 +12,31 @@
             <h1>Habit Dashboard</h1>
             <a class="btn" href="{{ url_for('add_habit_page') }}">Add Habit</a>
         </div>
-
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total Minutes This Week</h3>
+                <p>{{ total_minutes or 0 }}</p>
+            </div>
+            <div class="card">
+                <h3>Best Session This Week</h3>
+                {% if best_session %}
+                    <p>{{ best_session['minutes'] }} minutes</p>
+                    <p>of {{ best_session['habit_name'] }}</p>
+                    <small>{{ best_session['date'] }}</small>
+                {% else %}
+                    <p>No sessions yet</p>
+                {% endif %}
+            </div>
+            <div class="card">
+                <h3>Best Habit This Week</h3>
+                {% if best_habit %}
+                    <p>{{ best_habit['name'] }}</p>
+                    <p>{{ best_habit['total_minutes'] }} minutes</p>
+                {% else %}
+                    <p>No data yet</p>
+                {% endif %}
+            </div>
+        </div>
         {% if habits and habits|length > 0 %}
             <div class="habits">
                 {% for habit in habits %}

@@ -2,12 +2,7 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from .db import get_habits
-from .db import get_logs
-from .db import get_logs_between
-from .db import get_db_connection
-from .db import get_weekly_minutes_for_habit
-from .db import init_db
+from .db import *
 from datetime import date as dt_date, timedelta
 
 app = FastAPI()
@@ -32,9 +27,12 @@ def get_week_end():
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     habits = get_habits()
-    logs = get_logs_between(start_date=get_current_week_start(), end_date=get_week_end())
 
-    return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "logs": logs})
+    total_minutes =get_total_weekly_minutes(start_date=get_current_week_start(), end_date=get_week_end())
+    best_session = get_longest_log(start_date=get_current_week_start(), end_date=get_week_end())
+    best_habit = best_habit_of_week(start_date=get_current_week_start(), end_date=get_week_end())
+
+    return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "total_minutes": total_minutes, "best_session": best_session, "best_habit": best_habit})
 
 @app.get("/habit/{habit_id}", response_class=HTMLResponse)
 def habit_detail(request: Request, habit_id: int):

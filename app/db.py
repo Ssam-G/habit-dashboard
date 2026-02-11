@@ -63,6 +63,46 @@ def get_weekly_minutes_for_habit(habit_id, start_date, end_date):
     conn = get_db_connection()
     start_date = start_date.isoformat()
     end_date = end_date.isoformat()
-    result = conn.execute('SELECT SUM(minutes) as total_minutes FROM logs WHERE habit_id = ? AND date BETWEEN ? AND ?', (habit_id, start_date, end_date)).fetchone()
+    result = conn.execute('SELECT SUM(minutes) as total_habit_minutes FROM logs WHERE habit_id = ? AND date BETWEEN ? AND ?', (habit_id, start_date, end_date)).fetchone()
+    conn.close()
+    return result['total_habit_minutes'] if result['total_habit_minutes'] is not None else 0
+
+def get_total_weekly_minutes(start_date, end_date):
+    conn = get_db_connection()
+    start_date = start_date.isoformat()
+    end_date = end_date.isoformat()
+    result = conn.execute('SELECT COALESCE(SUM(minutes), 0) as total_minutes FROM logs WHERE date BETWEEN ? AND ?', (start_date, end_date)).fetchone()
     conn.close()
     return result['total_minutes'] if result['total_minutes'] is not None else 0
+
+def get_longest_log(start_date, end_date):
+    conn = get_db_connection()
+    start_date = start_date.isoformat()
+    end_date = end_date.isoformat()
+    result = conn.execute('''
+        SELECT logs.habit_id, habits.name as habit_name, logs.minutes, logs.date 
+        FROM logs
+        JOIN habits ON habits.id = logs.habit_id
+        WHERE logs.date 
+        BETWEEN ? AND ? 
+        ORDER BY logs.minutes DESC
+        LIMIT 1
+    ''', (start_date, end_date)).fetchone()
+    conn.close()
+    return result if result else None
+
+def best_habit_of_week(start_date, end_date):
+    conn = get_db_connection()
+    start_date = start_date.isoformat()
+    end_date = end_date.isoformat()
+    result = conn.execute('''
+        SELECT habits.id, habits.name, COALESCE(SUM(logs.minutes), 0) as total_minutes
+        FROM logs
+        JOIN habits ON habits.id = logs.habit_id
+        WHERE logs.date BETWEEN ? AND ?
+        GROUP BY habits.id
+        ORDER BY total_minutes DESC
+        LIMIT 1
+    ''', (start_date, end_date)).fetchone()
+    conn.close()
+    return result if result else None
