@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date as dt_date, timedelta
 
 DB_ONE = "habits.db"
 
@@ -106,3 +107,58 @@ def best_habit_of_week(start_date, end_date):
     ''', (start_date, end_date)).fetchone()
     conn.close()
     return result if result else None
+
+def get_current_streak_for_habit(habit_id):
+    conn = get_db_connection()
+    rows = conn.execute('''
+        SELECT DISTINCT date 
+        FROM logs 
+        WHERE habit_id = ? 
+        ORDER BY date DESC
+    ''', (habit_id,)).fetchall()
+    conn.close()
+
+    if not rows:
+        return 0
+    
+    dates = [dt_date.fromisoformat(row['date']) for row in rows]
+
+    today = dt_date.today()
+    yesterday = today - timedelta(days=1)
+
+    if dates[0] < yesterday:
+        return 0
+    
+    streak = 1
+    current_day = dates[0]
+
+    for next_day in dates[1:]:
+        if current_day - next_day == timedelta(days=1):
+            streak += 1
+            current_day = next_day
+        else:
+            break
+
+    return streak
+
+def get_longest_streak():
+    habits = get_habits()
+    
+    if not habits:
+        return 0
+    
+    longest = None
+    longest_streak = 0
+
+    for habit in habits:
+        streak = get_current_streak_for_habit(habit['id'])
+        if streak > longest_streak:
+            longest_streak = streak
+            longest = habit
+
+    if longest is None:
+        return None
+    
+    return {"habit_id": longest['id'], "habit_name": longest['name'], "streak": longest_streak}
+    
+        

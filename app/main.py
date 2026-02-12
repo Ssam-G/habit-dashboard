@@ -28,11 +28,11 @@ def get_week_end():
 def home(request: Request):
     habits = get_habits()
 
+    longest_streak = get_longest_streak()
     total_minutes =get_total_weekly_minutes(start_date=get_current_week_start(), end_date=get_week_end())
-    best_session = get_longest_log(start_date=get_current_week_start(), end_date=get_week_end())
     best_habit = best_habit_of_week(start_date=get_current_week_start(), end_date=get_week_end())
 
-    return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "total_minutes": total_minutes, "best_session": best_session, "best_habit": best_habit})
+    return templates.TemplateResponse("index.html", {"request": request, "habits": habits, "total_minutes": total_minutes, "longest_streak": longest_streak, "best_habit": best_habit})
 
 @app.get("/habit/{habit_id}", response_class=HTMLResponse)
 def habit_detail(request: Request, habit_id: int):
@@ -47,7 +47,9 @@ def habit_detail(request: Request, habit_id: int):
 
     weekly_minutes = get_weekly_minutes_for_habit(habit_id, start_date=get_current_week_start(), end_date=get_week_end())   
 
-    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes})
+    streak = get_current_streak_for_habit(habit_id)
+
+    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes, "streak": streak})
 
 @app.get("/add_habit_page", response_class=HTMLResponse)
 def add_habit_page(request: Request):
