@@ -36,7 +36,6 @@ def get_month_end():
     else:
         next_month = dt_date(today.year, today.month + 1, 1)
     end_of_month = next_month - timedelta(days=1)
-    print(f"Month end: {end_of_month}")
     return end_of_month
 
 
@@ -62,13 +61,18 @@ def habit_detail(request: Request, habit_id: int):
     start_date = get_current_week_start()
     end_date = get_week_end()
 
-    logs = get_logs_between_for_habit(habit_id, start_date, end_date)
+    month_start = get_month_start()
+    month_end = get_month_end()
+
+    weekly_logs = get_weekly_logs_for_habit(habit_id, start_date, end_date)
+
+    monthly_logs = get_monthly_logs_for_habit(habit_id, month_start, month_end)
 
     weekly_minutes = get_weekly_minutes_for_habit(habit_id, start_date, end_date)   
 
     streak = get_current_streak_for_habit(habit_id)
 
-    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes, "streak": streak, "start_date": start_date, "end_date": end_date})
+    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "weekly_logs": weekly_logs, "monthly_logs": monthly_logs, "weekly_minutes": weekly_minutes, "streak": streak, "start_date": start_date, "end_date": end_date})
 
 @app.get("/add_habit_page", response_class=HTMLResponse)
 def add_habit_page(request: Request):

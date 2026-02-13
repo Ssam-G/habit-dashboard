@@ -30,7 +30,7 @@
     </div>
     <div class="container">
         <h2>This weeks logs</h2>
-        {% for log in logs %}
+        {% for log in weekly_logs %}
             <div class="log-entry">
                 <p>{{ log['date'] }}: {{ log['minutes'] }} minutes</p>
                 {% if log['note'] %}

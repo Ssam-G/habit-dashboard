@@ -44,11 +44,19 @@ def get_logs(habit_id):
     conn.close()
     return logs
 
-def get_logs_between_for_habit(habit_id, start_date, end_date):
+def get_weekly_logs_for_habit(habit_id, start_date, end_date):
     conn = get_db_connection()
     start_date = start_date.isoformat()
     end_date = end_date.isoformat()
     logs = conn.execute('SELECT * FROM logs WHERE habit_id = ? AND date BETWEEN ? AND ? ORDER BY date ASC', (habit_id, start_date, end_date)).fetchall()
+    conn.close()
+    return logs
+
+def get_monthly_logs_for_habit(habit_id, month_start, month_end):
+    conn = get_db_connection()
+    month_start = month_start.isoformat()
+    month_end = month_end.isoformat()
+    logs = conn.execute('SELECT * FROM logs WHERE habit_id = ? AND date BETWEEN ? AND ? ORDER BY date ASC', (habit_id, month_start, month_end)).fetchall()
     conn.close()
     return logs
 
