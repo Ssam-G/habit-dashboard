@@ -24,6 +24,22 @@ def get_week_end():
     end_of_week = start_of_week + timedelta(days=6)
     return end_of_week
 
+def get_month_start():
+    today = dt_date.today()
+    start_of_month = dt_date(today.year, today.month, 1)
+    return start_of_month
+
+def get_month_end():
+    today = dt_date.today()
+    if today.month == 12:
+        next_month = dt_date(today.year + 1, 1, 1)
+    else:
+        next_month = dt_date(today.year, today.month + 1, 1)
+    end_of_month = next_month - timedelta(days=1)
+    print(f"Month end: {end_of_month}")
+    return end_of_month
+
+
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     habits = get_habits()
@@ -42,14 +58,17 @@ def habit_detail(request: Request, habit_id: int):
 
     if habit is None:
         return RedirectResponse("/", status_code=303)
+    
+    start_date = get_current_week_start()
+    end_date = get_week_end()
 
-    logs = get_logs(habit_id)
+    logs = get_logs_between_for_habit(habit_id, start_date, end_date)
 
-    weekly_minutes = get_weekly_minutes_for_habit(habit_id, start_date=get_current_week_start(), end_date=get_week_end())   
+    weekly_minutes = get_weekly_minutes_for_habit(habit_id, start_date, end_date)   
 
     streak = get_current_streak_for_habit(habit_id)
 
-    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes, "streak": streak})
+    return templates.TemplateResponse("habit.html", {"request": request, "habit": habit, "logs": logs, "weekly_minutes": weekly_minutes, "streak": streak, "start_date": start_date, "end_date": end_date})
 
 @app.get("/add_habit_page", response_class=HTMLResponse)
 def add_habit_page(request: Request):
