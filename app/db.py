@@ -1,10 +1,10 @@
 import sqlite3
 from datetime import date as dt_date, timedelta
 
-DB_ONE = "habits.db"
+DB_NAME = "habits.db"
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_ONE)
+    conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     conn.execute('PRAGMA foreign_keys = ON')
     return conn
@@ -160,5 +160,4 @@ def get_longest_streak():
         return None
     
     return {"habit_id": longest['id'], "habit_name": longest['name'], "streak": longest_streak}
-    
         
