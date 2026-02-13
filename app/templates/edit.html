@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Habit Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Log</h1>
+    </div>
+    <div class="container">
+        <form method="post" action="/edit_log/{{ habit['id']}}/{{ log['id']}}">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" placeholder=date />
+            <label for="minutes">Minutes:</label>
+            <input type="number" id="minutes" name="minutes" min="0" placeholder= minutes required />
+            <label for="note">Note:</label>
+            <input type="text" id="note" name="note" placeholder=note />
+            <button type="submit">Save</button>
+            <a class="btn" href="/habit/{{ habit['id'] }}">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

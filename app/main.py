@@ -81,4 +81,41 @@ def add_log(request: Request, habit_id, date: str = Form(None), minutes: int = F
     conn.close()
 
     return RedirectResponse(f"/habit/{habit_id}", status_code=303)
-    
+
+@app.get("/edit_page/{habit_id}/{log_id}", response_class=HTMLResponse)
+def edit_page(request: Request, habit_id, log_id):
+    conn = get_db_connection()
+    habit = conn.execute('SELECT * FROM habits WHERE id = ?', (habit_id,)).fetchone()
+    log = conn.execute('SELECT * FROM logs WHERE id = ?', (log_id,)).fetchone()
+    conn.close()
+
+    return templates.TemplateResponse("edit.html", {"request": request, "habit": habit, "log": log})
+
+@app.post("/edit_log/{habit_id}/{log_id}", response_class=HTMLResponse)
+def edit_log(request: Request, habit_id, log_id, date: str = Form(None), minutes: int = Form(...), note: str = Form(None)):
+    conn = get_db_connection()
+    log = conn.execute('SELECT * FROM logs WHERE id = ?', (log_id,)).fetchone()
+    conn.close()
+
+    if log is None:
+        return RedirectResponse(f"/habit/{habit_id}", status_code=303)
+
+    date = log['date'] if date is None else date
+    minutes = log['minutes'] if minutes is None else minutes
+    note = log['note'] if note is None else note
+
+    conn = get_db_connection()
+    conn.execute('UPDATE logs SET date = ?, minutes = ?, note = ? WHERE id = ?', (date, minutes, note, log_id))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(f"/habit/{habit_id}", status_code=303)
+
+@app.post("/delete_log/{habit_id}/{log_id}", response_class=HTMLResponse)
+def delete_log(habit_id: int, log_id: int):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM logs WHERE id = ?', (log_id,))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(f"/habit/{habit_id}", status_code=303)
